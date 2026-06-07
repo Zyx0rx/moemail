@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "prebuild:pages": "rm -f public/sw.js public/workbox-*.js && rm -rf .vercel/output",
     "build:pages": "npx @cloudflare/next-on-pages",
     "db:migrate-local": "tsx scripts/migrate.ts local",
     "db:migrate-remote": "tsx scripts/migrate.ts remote",
