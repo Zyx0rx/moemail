@@ -163,6 +163,12 @@ const updateKVConfig = (namespaceId: string) => {
 const checkAndCreateDatabase = async () => {
   console.log(`🔍 Checking if database "${DATABASE_NAME}" exists...`);
 
+  if (process.env.DATABASE_ID) {
+    updateDatabaseConfig(process.env.DATABASE_ID);
+    console.log(`✅ User specified database ID (ID: ${process.env.DATABASE_ID})`);
+    return;
+  }
+
   try {
     const database = await getDatabase();
 
@@ -249,8 +255,15 @@ const checkAndCreatePages = async () => {
   console.log(`🔍 Checking if project "${PROJECT_NAME}" exists...`);
 
   try {
-    await getPages();
+    const pages = await getPages();
     console.log("✅ Project already exists, proceeding with update...");
+
+    if (!CUSTOM_DOMAIN && pages?.subdomain) {
+      console.log("⚠️ CUSTOM_DOMAIN is empty, using pages default domain...");
+      console.log("📝 Updating environment variables...");
+      const appUrl = `https://${pages.subdomain}`;
+      updateEnvVar("CUSTOM_DOMAIN", appUrl);
+    }
   } catch (error) {
     if (error instanceof NotFoundError) {
       console.log("⚠️ Project not found, creating new project...");
@@ -259,14 +272,11 @@ const checkAndCreatePages = async () => {
       if (!CUSTOM_DOMAIN && pages.subdomain) {
         console.log("⚠️ CUSTOM_DOMAIN is empty, using pages default domain...");
         console.log("📝 Updating environment variables...");
-
-        // 更新环境变量为默认的Pages域名
         const appUrl = `https://${pages.subdomain}`;
         updateEnvVar("CUSTOM_DOMAIN", appUrl);
       }
     } else {
-      console.error(`❌ An error occurred while checking the project:`, error);
-      throw error;
+      console.warn("⚠️ Failed to verify Pages project via API, continuing with deploy step:", error);
     }
   }
 };
