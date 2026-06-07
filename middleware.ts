@@ -21,7 +21,8 @@ export async function middleware(request: Request) {
   if (pathname.startsWith('/api')) {
     if (
       pathname.startsWith('/api/auth') ||
-      pathname.startsWith('/api/shared')
+      pathname.startsWith('/api/shared') ||
+      (pathname === '/api/config' && request.method === 'GET')
     ) {
       return NextResponse.next()
     }
@@ -38,10 +39,6 @@ export async function middleware(request: Request) {
         { error: "未授权" },
         { status: 401 }
       )
-    }
-
-    if (pathname === '/api/config' && request.method === 'GET') {
-      return NextResponse.next()
     }
 
     for (const [route, permission] of Object.entries(API_PERMISSIONS)) {
