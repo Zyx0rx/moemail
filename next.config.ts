@@ -27,11 +27,16 @@ const nextConfig = {
   },
 };
 
+const isCloudflarePagesBuild =
+  process.env.CI === 'true' ||
+  process.env.GITHUB_ACTIONS === 'true' ||
+  Boolean(process.env.CLOUDFLARE_API_TOKEN);
+
 const withPWAConfigured = withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development',
+  disable: process.env.NODE_ENV === 'development' || isCloudflarePagesBuild,
 }) as any
 
 const configWithPWA = withPWAConfigured(nextConfig as any) as any
